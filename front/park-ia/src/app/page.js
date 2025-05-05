@@ -3,24 +3,36 @@ import { useEffect, useState } from 'react';
 import { fetchData, postData } from '../../lib/api';
 
 export default function Home() {
-  const [data, setData] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const result = await fetchData('/example-endpoint');
-        setData(result);
-      } catch (error) {
-        console.error('Erreur lors du chargement des données :', error);
-      }
-    };
-
-    loadData();
-  }, []);
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setImagePreview(null);
+    }
+  };
 
   const handleSubmit = async () => {
+    if (!imagePreview) {
+      console.error('Aucune image sélectionnée');
+      return;
+    }
+  
     try {
-      const postDataResult = await postData('/detect', { key: 'value' });
+      // Créer FormData avec l'image
+      const formData = new FormData();
+      // Convertir le base64 en blob
+      const base64Response = await fetch(imagePreview);
+      const blob = await base64Response.blob();
+      formData.append('image', blob, 'image.jpg');
+  
+      const postDataResult = await postData('/detect', formData);
       console.log(postDataResult);
     } catch (error) {
       console.error('Erreur lors de l\'envoi des données :', error);
@@ -28,14 +40,53 @@ export default function Home() {
   };
 
   return (
-    <div>
-      <h1>Bienvenue sur Park.IA</h1>
-      <div>
-        <h2>Données récupérées :</h2>
-        <pre>{JSON.stringify(data, null, 2)}</pre>
-      </div>
-      <input type="file" accept="image/*" onChange={(e) => console.log(e.target.files[0])}/>
-      <button onClick={handleSubmit}>Envoyer des données</button>
-    </div>
+    <div className='flex flex-col items-center justify-center'>
+      <h1 className='flex uppercase font-bold text-red-500 justify-center mt-5'>Bienvenue sur Park.IA</h1>
+          {!imagePreview && (
+            <div className='container bg-red-100 flex flex-row w-1/2 m-auto justify-center items-center rounded-lg relative'>
+              <div className='flex flex-col w-full justify-center items-center gap-4'>
+                <div className="h-64 flex items-center justify-center">
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleFileChange} 
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {imagePreview && (
+            <div className='container flex flex-row w-1/2 m-auto justify-center items-center rounded-lg relative'>
+              <div className='flex flex-col w-full justify-center items-center gap-4'>
+                <div>
+                  <div className="relative group">
+                    <img
+                      src={imagePreview}
+                      alt="Aperçu"
+                      className="max-w-full object-contain rounded transition-all duration-300 group-hover:blur-sm"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={handleFileChange}
+                        className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+                      />
+                      <span className="text-black font-semibold pointer-events-none bg-white/50 px-4 py-2 rounded">
+                        Changer l'image
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex justify-center">
+                    <button className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" onClick={handleSubmit}>
+                      Envoyer des données
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
   );
 }

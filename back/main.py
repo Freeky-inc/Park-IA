@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse, FileResponse
 import shutil
 import os
 from roboflow_detect import detect_parking
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 

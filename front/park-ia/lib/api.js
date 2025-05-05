@@ -8,7 +8,6 @@ const apiClient = axios.create({
   },
 });
 
-// Exemple de requête GET
 export const fetchData = async (endpoint) => {
   try {
     const response = await apiClient.get(endpoint);
@@ -19,15 +18,20 @@ export const fetchData = async (endpoint) => {
   }
 };
 
-// Exemple de requête POST
-export const postData = async (endpoint, data) => {
-  try {
-    const response = await apiClient.post(endpoint, data);
-    return response.data;
-  } catch (error) {
-    console.error("Erreur lors de l'envoi des données :", error);
-    throw error;
+export const postData = async (url, data) => {
+  const response = await fetch(`http://localhost:8000${url}`, {
+    method: 'POST',
+    body: data instanceof FormData ? data : JSON.stringify(data),
+    headers: data instanceof FormData ? {} : {
+      'Content-Type': 'application/json',
+    },
+  });
+  
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
   }
+  
+  return await response.json();
 };
 
 // Tu peux ajouter d'autres méthodes (PUT, DELETE) selon tes besoins
