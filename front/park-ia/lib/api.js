@@ -19,19 +19,39 @@ export const fetchData = async (endpoint) => {
 };
 
 export const postData = async (url, data) => {
-  const response = await fetch(`http://localhost:8000${url}`, {
-    method: 'POST',
-    body: data instanceof FormData ? data : JSON.stringify(data),
-    headers: data instanceof FormData ? {} : {
-      'Content-Type': 'application/json',
-    },
-  });
-  
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+  try {
+    // For debugging
+    if (data instanceof FormData) {
+      console.log('Form data contents:', Array.from(data.entries()));
+    }
+
+    const response = await fetch(`http://localhost:8000${url}`, {
+      method: 'POST',
+      body: data,
+      headers: data instanceof FormData ? {
+        'accept': 'application/json',
+      } : {
+        'Content-Type': 'application/json',
+        'accept': 'application/json'
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+        throw new Error(`Erreur de validation: ${errorData.detail[0].msg}`);
+      } catch (e) {
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      }
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Erreur lors de l'envoi des données:", error);
+    throw error;
   }
-  
-  return await response.json();
 };
 
 // Tu peux ajouter d'autres méthodes (PUT, DELETE) selon tes besoins

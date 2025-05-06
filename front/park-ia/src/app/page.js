@@ -25,15 +25,14 @@ export default function Home() {
     }
   
     try {
-      // Créer FormData avec l'image
       const formData = new FormData();
-      // Convertir le base64 en blob
       const base64Response = await fetch(imagePreview);
       const blob = await base64Response.blob();
-      formData.append('image', blob, 'image.jpg');
+      // Important: FastAPI expects the field name to be "file"
+      formData.append('file', blob, 'image.jpg');
   
-      const postDataResult = await postData('/detect', formData);
-      console.log(postDataResult);
+      const result = await postData('/detect', formData);
+      console.log('Résultat:', result);
     } catch (error) {
       console.error('Erreur lors de l\'envoi des données :', error);
     }
