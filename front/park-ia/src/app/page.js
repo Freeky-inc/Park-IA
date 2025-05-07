@@ -28,7 +28,7 @@ export default function Home() {
       const formData = new FormData();
       const base64Response = await fetch(imagePreview);
       const blob = await base64Response.blob();
-      // Important: FastAPI expects the field name to be "file"
+      //Pour que ça fonctionne, il faut que l'image soit au format blob
       formData.append('file', blob, 'image.jpg');
   
       const result = await postData('/detect', formData);
@@ -40,7 +40,7 @@ export default function Home() {
 
   return (
     <div className='flex flex-col items-center justify-center'>
-      <h1 className='flex uppercase font-bold text-red-500 justify-center mt-5'>Bienvenue sur Park.IA</h1>
+      <h1 className='uppercase font-bold text-2xl text-red-500 justify-center mt-5 mb-5'>Bienvenue sur Park.IA</h1>
           {!imagePreview && (
             <div className='container bg-red-100 flex flex-row w-1/2 m-auto justify-center items-center rounded-lg relative'>
               <div className='flex flex-col w-full justify-center items-center gap-4'>
