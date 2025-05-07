@@ -1,12 +1,10 @@
 from roboflow import Roboflow
 
-# Initialise Roboflow une seule fois
-rf = Roboflow(api_key="NyMVhqsspNvipvttBfkQ")  # 🔑 à remplacer
+rf = Roboflow(api_key="NyMVhqsspNvipvttBfkQ")
 project = rf.workspace("minervas-workspace-7comk").project("car-parking-occupation")
-model = project.version(1).model  # adapte si version différente
-
+model = project.version(1).model
 def detect_parking(image_path: str, save_path: str = "static/annotated.jpg"):
-    results = model.predict(image_path, confidence=40, overlap=30)
+    results = model.predict(image_path, confidence=40, overlap=0.88)
     results.save(save_path)
 
     raw = results.json()
