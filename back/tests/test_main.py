@@ -1,36 +1,45 @@
 import os
 import pytest
 from fastapi.testclient import TestClient
-from app.main import app  # Assure-toi que tu importes bien ton app FastAPI
+from PIL import Image
 
-# Crée une instance de testclient
+from app.main import app  # Ensure your FastAPI app is correctly imported
+
+# Create a TestClient instance
 client = TestClient(app)
 
-# Crée un dossier temporaire pour les fichiers uploadés
-UPLOAD_FOLDER = "uploads"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-# Crée un fichier temporaire pour simuler l'upload d'une image
+# Fixture to create a temporary valid image file
 @pytest.fixture
-def fake_image():
-    with open("test_image.jpg", "wb") as f:
-        f.write(b"fake_image_data")  # Simule des données d'image
-    yield "test_image.jpg"
-    os.remove("test_image.jpg")  # Nettoyage après test
+def fake_image(tmp_path):
+    # Define the path for the temporary image
+    image_path = tmp_path / "test_image.jpg"
+    
+    # Create a simple image using Pillow
+    image = Image.new("RGB", (100, 100), color="white")
+    image.save(image_path, format="JPEG")
+    
+    # Provide the path to the test
+    yield image_path
+
+    # Cleanup is handled automatically by tmp_path
 
 def test_detect(fake_image):
-    # Simule un upload de fichier
+    # Simulate file upload
     with open(fake_image, "rb") as image_file:
-        response = client.post("/detect", files={"file": ("test_image.jpg", image_file, "image/jpeg")})
+        response = client.post(
+            "/detect",
+            files={"file": ("test_image.jpg", image_file, "image/jpeg")}
+        )
 
-    # Vérifie que la réponse a un statut 200 OK
+    # Verify the response status code
     assert response.status_code == 200
 
-    # Vérifie la structure de la réponse JSON
+    # Verify the structure of the JSON response
     response_json = response.json()
     assert "places_detectees" in response_json
     assert "boxes" in response_json
     assert "image_url" in response_json
 
-    # Vérifie que l'image annotée a bien été générée
-    assert os.path.exists("static/annotated.jpg")
+    # Verify that the annotated image has been generated
+    annotated_image_path = "static/annotated.jpg"
+    assert os.path.exists(annotated_image_path)
