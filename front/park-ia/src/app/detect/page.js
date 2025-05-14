@@ -9,6 +9,9 @@ export default function DetectPage() {
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
   const imageRef = useRef(null);
   const router = useRouter();
+  const [placesL, setPlacesL] = useState(0);
+  const [message, setMessage] = useState("");
+
 
   useEffect(() => {
     // Récupérer les données du localStorage
@@ -24,6 +27,20 @@ export default function DetectPage() {
     setImageData(storedImage);
     setDetections(JSON.parse(storedDetections));
   }, []);
+
+  useEffect(() => {
+    if (detections && detections.boxes) {
+      const boxesWithoutCars = detections.boxes.filter((box) => box.class == 'free');
+      setPlacesL(boxesWithoutCars.length);
+
+      if (placesL === 0) {
+        setMessage("Il n'y a pas de place disponible");
+      } else {
+        setMessage(`Il y a ${placesL} places disponibles`);
+      }
+    }
+  }, [detections]);
+
 
   const renderDetections = (boxes) => {
     if (!imageRef.current) return null;
@@ -48,7 +65,7 @@ export default function DetectPage() {
               top: `${y}px`,
               width: `${width}px`,
               height: `${height}px`,
-              pointerEvents: 'none'
+              pointerEvents: 'none',
             }}
           >
             <span className="absolute -top-6 left-0 bg-green-500 text-white px-2 py-1 text-sm rounded">
@@ -58,6 +75,7 @@ export default function DetectPage() {
         );
       });
   };
+
 
   return (
     <div className='flex flex-col items-center justify-center'>
@@ -71,8 +89,7 @@ export default function DetectPage() {
             <div className="relative">
               <img
                 ref={imageRef}
-                src={imageData} // Changed from imageUrl to imageData
-                alt="Image analysée"
+                src={imageData}
                 className="max-w-full object-contain rounded"
                 onLoad={() => {
                   setImageSize({
@@ -83,7 +100,11 @@ export default function DetectPage() {
               />
               {detections && renderDetections(detections.boxes)}
             </div>
-            <div className="flex justify-center mt-4">
+
+            <div className="flex flex-col justify-center mt-4">
+              <p className="text-lg font-semibold text-gray-700">
+                {message}
+              </p>
               <Link href="/">
                 <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
                   Retour à l'accueil
