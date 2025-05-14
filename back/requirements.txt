@@ -3,3 +3,5 @@ uvicorn
 python-multipart
 roboflow
 opencv-python
+pytest
+httpx

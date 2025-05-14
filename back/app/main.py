@@ -2,7 +2,7 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse, FileResponse
 import shutil
 import os
-from roboflow_detect import detect_parking
+from app.roboflow_detect import detect_parking
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -36,7 +36,3 @@ async def detect(file: UploadFile = File(...)):
         "boxes": result["boxes"],
         "image_url": f"/annotated"
     })
-
-@app.get("/annotated")
-async def get_annotated():
-    return FileResponse(ANNOTATED_IMAGE, media_type="image/jpeg")
