@@ -31,12 +31,14 @@ export default function DetectPage() {
   useEffect(() => {
     if (detections && detections.boxes) {
       const boxesWithoutCars = detections.boxes.filter((box) => box.class == 'free');
-      setPlacesL(boxesWithoutCars.length);
-
-      if (placesL === 0) {
+      const count = boxesWithoutCars.length;
+      setPlacesL(count);
+  
+      // Mettre à jour le message directement avec count au lieu de placesL
+      if (count === 0) {
         setMessage("Il n'y a pas de place disponible");
       } else {
-        setMessage(`Il y a ${placesL} places disponibles`);
+        setMessage(`Il y a ${count} places disponibles`);
       }
     }
   }, [detections]);
@@ -101,7 +103,7 @@ export default function DetectPage() {
               {detections && renderDetections(detections.boxes)}
             </div>
 
-            <div className="flex flex-col justify-center mt-4">
+            <div className="flex flex-col items-center justify-center mt-4">
               <p className="text-lg font-semibold text-gray-700">
                 {message}
               </p>

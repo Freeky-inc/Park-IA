@@ -90,7 +90,6 @@ export default function Home() {
                     <img
                       ref={imageRef}
                       src={imagePreview}
-                      alt="Aperçu"
                       className="max-w-full object-contain rounded transition-all duration-300 group-hover:blur-sm"
                       onLoad={() => {
                         setImageSize({
