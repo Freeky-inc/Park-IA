@@ -1,9 +1,12 @@
 import os
+import sys
 import pytest
 from fastapi.testclient import TestClient
 from PIL import Image
 
 from app.main import app  # Ensure your FastAPI app is correctly imported
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Create a TestClient instance
 client = TestClient(app)

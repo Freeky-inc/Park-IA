@@ -1,7 +1,13 @@
 from roboflow import Roboflow
+from dotenv import load_dotenv
+import os
 
-rf = Roboflow(api_key="NyMVhqsspNvipvttBfkQ")
-project = rf.workspace("minervas-workspace-7comk").project("car-parking-occupation")
+load_dotenv()
+
+Api_key = os.getenv("API_KEY")
+
+rf = Roboflow(api_key=Api_key)  
+project = rf.workspace('minervas-workspace-7comk').project('car-parking-occupation')
 model = project.version(1).model
 def detect_parking(image_path: str, save_path: str = "static/annotated.jpg"):
     results = model.predict(image_path, confidence=40, overlap=0.88)
