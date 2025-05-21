@@ -5,10 +5,16 @@ import cv2
 import numpy as np
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse, FileResponse
-import shutil
-import os
+from http.client import HTTPException
 from app.roboflow_detect import detect_parking
 from fastapi.middleware.cors import CORSMiddleware
+
+import numpy as np
+
+import shutil
+import os
+import cv2
+import base64
 
 app = FastAPI()
 
@@ -43,24 +49,31 @@ async def detect(file: UploadFile = File(...)):
     })
 
 
-
-# Endpoint pour traiter une image upload (grayscale) et retourner le résultat en base64
-@app.post("/show-uploaded")
+@app.post("/gray_img")
 async def show_uploaded_image(file: UploadFile = File(...)):
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Seules les images sont acceptées")
 
-    contents = await file.read()
-    img = cv2.imdecode(np.frombuffer(contents, np.uint8), cv2.IMREAD_COLOR)
-    if img is None:
-        raise HTTPException(status_code=400, detail="Image invalide ou illisible")
+    try:
+        contents = await file.read()
+        img = cv2.imdecode(np.frombuffer(contents, np.uint8), cv2.IMREAD_COLOR)
+        if img is None:
+            raise HTTPException(status_code=400, detail="Image invalide ou illisible")
 
-    # Exemple de traitement : conversion en niveaux de gris
-    gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    _, buffer = cv2.imencode('.jpg', gray_img)
-    img_base64 = base64.b64encode(buffer).decode("utf-8")
+        # Fix: Correct constant name for grayscale conversion
+        gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        
+        # Save grayscale image
+        gray_path = "static/gray_" + file.filename
+        cv2.imwrite(gray_path, gray_img)
+        
+        # Convert to base64
+        _, buffer = cv2.imencode('.jpg', gray_img)
+        img_base64 = base64.b64encode(buffer).decode("utf-8")
 
-    return {
-        "filename": file.filename,
-        "image_base64": img_base64}
-
+        return {
+            "image_base64": f"data:image/jpeg;base64,{img_base64}",
+        }
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
