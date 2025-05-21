@@ -1,3 +1,8 @@
+import base64
+from http.client import HTTPException
+
+import cv2
+import numpy as np
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse, FileResponse
 from http.client import HTTPException
@@ -42,6 +47,7 @@ async def detect(file: UploadFile = File(...)):
         "boxes": result["boxes"],
         "image_url": f"/annotated"
     })
+
 
 @app.post("/gray_img")
 async def show_uploaded_image(file: UploadFile = File(...)):
