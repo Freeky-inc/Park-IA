@@ -1,57 +1,63 @@
-// lib/api.js
 import axios from 'axios';
 
+// Create axios instance with default config
 const apiClient = axios.create({
-  baseURL: 'http://localhost:8000', // L'URL de ton backend FastAPI
+  baseURL: 'http://localhost:8000',
   headers: {
     'Content-Type': 'application/json',
-  },
+    'Accept': 'application/json'
+  }
 });
 
+// Add request interceptor to handle FormData
+apiClient.interceptors.request.use((config) => {
+  if (config.data instanceof FormData) {
+    // Remove Content-Type header for FormData
+    delete config.headers['Content-Type'];
+    // Log FormData contents for debugging
+    console.log('Form data contents:', Array.from(config.data.entries()));
+  }
+  return config;
+});
+
+// GET request handler
 export const fetchData = async (endpoint) => {
   try {
     const response = await apiClient.get(endpoint);
     return response.data;
   } catch (error) {
-    console.error("Erreur lors de la récupération des données :", error);
-    throw error;
+    handleApiError(error);
   }
 };
 
+// POST request handler
 export const postData = async (url, data) => {
   try {
-    // For debugging
-    if (data instanceof FormData) {
-      console.log('Form data contents:', Array.from(data.entries()));
-    }
-
-    const response = await fetch(`http://localhost:8000${url}`, {
-      method: 'POST',
-      body: data,
-      headers: data instanceof FormData ? {
-        'accept': 'application/json',
-      } : {
-        'Content-Type': 'application/json',
-        'accept': 'application/json'
-      },
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      let errorData;
-      try {
-        errorData = JSON.parse(errorText);
-        throw new Error(`Erreur de validation: ${errorData.detail[0].msg}`);
-      } catch (e) {
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-      }
-    }
-
-    return await response.json();
+    const response = await apiClient.post(url, data);
+    return response.data;
   } catch (error) {
-    console.error("Erreur lors de l'envoi des données:", error);
-    throw error;
+    handleApiError(error);
   }
 };
 
-// Tu peux ajouter d'autres méthodes (PUT, DELETE) selon tes besoins
+// Error handler helper
+const handleApiError = (error) => {
+  if (error.response) {
+    // Server responded with error status
+    const errorMessage = error.response.data.detail?.[0]?.msg 
+      || error.response.data.message 
+      || 'Une erreur est survenue';
+    console.error('Error response:', errorMessage);
+    throw new Error(errorMessage);
+  } else if (error.request) {
+    // Request made but no response
+    console.error('No response received:', error.request);
+    throw new Error('Aucune réponse du serveur');
+  } else {
+    // Error in request setup
+    console.error('Request error:', error.message);
+    throw new Error("Erreur lors de l'envoi de la requête");
+  }
+};
+
+export default apiClient;
