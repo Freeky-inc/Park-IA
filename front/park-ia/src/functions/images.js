@@ -28,5 +28,25 @@ export const handleImageSubmit = async (imagePreview) => {
 };
 
 export const handleImagePreProcessing = async (imagePreview) => {
+  if (!imagePreview) {
+    throw new Error('Aucune image sélectionnée');
+  }
 
+  const formData = new FormData();
+  
+  // Convert base64 to blob
+  const base64Data = imagePreview.split(',')[1];
+  const byteCharacters = atob(base64Data);
+  const byteArray = new Uint8Array(byteCharacters.length);
+  
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteArray[i] = byteCharacters.charCodeAt(i);
+  }
+  
+  const blob = new Blob([byteArray], { type: 'image/jpeg' });
+  formData.append('file', blob, 'image.jpg');
+
+  const image =  await postData('/gray_img', formData);
+
+  return await handleImageSubmit(image.image_base64)
 };

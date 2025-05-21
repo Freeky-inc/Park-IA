@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { handleImageSubmit } from '../functions/images';
+import { handleImageSubmit, handleImagePreProcessing } from '../functions/images';
 import Loader from '../../components/loader';
 
 export default function Home() {
@@ -24,50 +24,34 @@ export default function Home() {
     }
   };
 
-  const handleSubmit = async () => {
-    if (!imagePreview) {
-      console.error('Aucune image sélectionnée');
-      return;
-    }
+const handleSubmit = async () => {
+    if (!imagePreview) return;
 
     setIsLoading(true);
-  
     try {
       const result = await handleImageSubmit(imagePreview);
-      
-      // Stocker les données dans localStorage
       localStorage.setItem('parkIA_image', imagePreview);
       localStorage.setItem('parkIA_detections', JSON.stringify(result));
-      
-      // Rediriger vers la page de détection
-      router.push('/detect');
-    } catch (error) {
-      console.error('Erreur lors de l\'envoi des données :', error);
+      await router.push('/detect');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-    const handleSubmitProcess = async () => {
-    if (!imagePreview) {
-      console.error('Aucune image sélectionnée');
-      return;
-    }
+  const handleSubmitProcess = async () => {
+    if (!imagePreview) return;
 
     setIsLoading(true);
-  
     try {
       const result = await handleImagePreProcessing(imagePreview);
-      
-      // Stocker les données dans localStorage
       localStorage.setItem('parkIA_image', imagePreview);
       localStorage.setItem('parkIA_detections', JSON.stringify(result));
       
-      // Rediriger vers la page de détection
-      router.push('/detect');
-    } catch (error) {
-      console.error('Erreur lors de l\'envoi des données :', error);
+      await router.push('/detect');
+    } finally {
+      setIsLoading(false);
     }
   };
-
 
   useEffect(() => {
     if (imageRef.current) {
