@@ -24,7 +24,7 @@ export default function Home() {
     }
   };
 
-  const handleSubmitWP = async () => {
+  const handleSubmit = async () => {
     if (!imagePreview) {
       console.error('Aucune image sélectionnée');
       return;
@@ -114,9 +114,15 @@ export default function Home() {
                   <div className="flex justify-center">
                     <button 
                       className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" 
-                      onClick={handleSubmitWP}
+                      onClick={handleSubmit}
                     > 
                       Détecter les places
+                    </button>
+                    <button 
+                      className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" 
+                      onClick={handleSubmit}
+                    > 
+                      Prétraiter et détecter
                     </button>
                   </div>
                 )}
