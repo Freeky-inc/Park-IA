@@ -5,11 +5,19 @@ services:
     build:
       context: ./front
       dockerfile: Dockerfile
-    volumes:
-      - ./front/park-ia:/app
     ports:
       - "3000:3000"
     working_dir: /app
+    volumes:
+      # Remplace ce montage destructeur :
+      # - ./front/park-ia:/app
+
+      # Par un montage "non destructeur", si tu veux live-reload :
+      - ./front/park-ia/src:/app/src
+      - ./front/park-ia/components:/app/components
+      - ./front/park-ia/public:/app/public
+      - ./front/park-ia/next.config.mjs:/app/next.config.mjs
+      - ./front/park-ia/.env:/app/.env
     command: ["npm", "run", "dev"]
 
   backend:
