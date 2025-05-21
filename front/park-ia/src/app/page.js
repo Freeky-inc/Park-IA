@@ -50,9 +50,9 @@ export default function Home() {
       console.error('Erreur lors de l\'envoi des données :', error);
     }
 
-    finally {
-      setIsLoading(false);
-    }
+    // finally {
+    //   setIsLoading(false);
+    // }
 };
 
 
@@ -117,6 +117,12 @@ export default function Home() {
                       onClick={handleSubmit}
                     > 
                       Détecter les places
+                    </button>
+                    <button 
+                      className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" 
+                      onClick={handleSubmit}
+                    > 
+                      Prétraiter et détecter
                     </button>
                   </div>
                 )}
