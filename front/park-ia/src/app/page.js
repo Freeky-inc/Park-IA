@@ -24,7 +24,7 @@ export default function Home() {
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmitWP = async () => {
     if (!imagePreview) {
       console.error('Aucune image sélectionnée');
       return;
@@ -50,9 +50,9 @@ export default function Home() {
       console.error('Erreur lors de l\'envoi des données :', error);
     }
 
-    finally {
-      setIsLoading(false);
-    }
+    // finally {
+    //   setIsLoading(false);
+    // }
 };
 
 
@@ -114,7 +114,7 @@ export default function Home() {
                   <div className="flex justify-center">
                     <button 
                       className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" 
-                      onClick={handleSubmit}
+                      onClick={handleSubmitWP}
                     > 
                       Détecter les places
                     </button>
