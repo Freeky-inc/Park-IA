@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  back:
+    build: ./back
+    container_name: parkia-back
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./back/static:/app/static
+      - ./back/uploads:/app/uploads
+    environment:
+      - PYTHONUNBUFFERED=1
+      - API_KEY=NyMVhqsspNvipvttBfkQ
+
+  front:
+    build: ./front/park-ia
+    container_name: parkia-front
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - back

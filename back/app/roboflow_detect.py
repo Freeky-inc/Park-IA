@@ -5,6 +5,8 @@ import os
 load_dotenv()
 
 Api_key = os.getenv("API_KEY")
+if not Api_key or not isinstance(Api_key, str):
+    raise RuntimeError(f"API_KEY is not set or not a string. Value: {Api_key}")
 
 rf = Roboflow(api_key=Api_key)  
 project = rf.workspace('minervas-workspace-7comk').project('car-parking-occupation')
