@@ -12,9 +12,6 @@ RUN apt-get update && \
     dnsutils && \
     rm -rf /var/lib/apt/lists/*
 
-# Configuration DNS
-RUN echo "nameserver 8.8.8.8\nnameserver 8.8.4.4" > /etc/resolv.conf
-
 # Installation des dépendances Python
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
