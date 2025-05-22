@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useRef, useState } from 'react';
-import { fetchData, postData } from '../../lib/api';
 import { useRouter } from 'next/navigation';
+import { handleImageSubmit, handleImagePreProcessing } from '../functions/images';
 import Loader from '../../components/loader';
 
 export default function Home() {
@@ -24,37 +24,34 @@ export default function Home() {
     }
   };
 
-  const handleSubmit = async () => {
-    if (!imagePreview) {
-      console.error('Aucune image sélectionnée');
-      return;
-    }
+const handleSubmit = async () => {
+    if (!imagePreview) return;
 
     setIsLoading(true);
-  
     try {
-      const formData = new FormData();
-      const base64Response = await fetch(imagePreview);
-      const blob = await base64Response.blob();
-      formData.append('file', blob, 'image.jpg');
-  
-      const result = await postData('/detect', formData);
-      
-      // Stocker les données dans localStorage
+      const result = await handleImageSubmit(imagePreview);
+      localStorage.setItem('parkIA_image', imagePreview);
+      localStorage.setItem('parkIA_detections', JSON.stringify(result));
+      await router.push('/detect');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmitProcess = async () => {
+    if (!imagePreview) return;
+
+    setIsLoading(true);
+    try {
+      const result = await handleImagePreProcessing(imagePreview);
       localStorage.setItem('parkIA_image', imagePreview);
       localStorage.setItem('parkIA_detections', JSON.stringify(result));
       
-      // Rediriger sans paramètres
-      router.push('/detect');
-    } catch (error) {
-      console.error('Erreur lors de l\'envoi des données :', error);
+      await router.push('/detect');
+    } finally {
+      setIsLoading(false);
     }
-
-    // finally {
-    //   setIsLoading(false);
-    // }
-};
-
+  };
 
   useEffect(() => {
     if (imageRef.current) {
@@ -111,7 +108,7 @@ export default function Home() {
                   </div>
                 </div>
                 {!isLoading && (
-                  <div className="flex justify-center">
+                  <div className="flex justify-center gap-4">
                     <button 
                       className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" 
                       onClick={handleSubmit}
@@ -120,7 +117,7 @@ export default function Home() {
                     </button>
                     <button 
                       className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" 
-                      onClick={handleSubmit}
+                      onClick={handleSubmitProcess}
                     > 
                       Prétraiter et détecter
                     </button>

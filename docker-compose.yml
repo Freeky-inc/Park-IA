@@ -1,32 +1,23 @@
-version: "3.8"
-
+version: '3.8'
 services:
-  frontend:
-    build:
-      context: ./front
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-    working_dir: /app
-    volumes:
-      # Remplace ce montage destructeur :
-      # - ./front/park-ia:/app
-
-      # Par un montage "non destructeur", si tu veux live-reload :
-      - ./front/park-ia/src:/app/src
-      - ./front/park-ia/components:/app/components
-      - ./front/park-ia/public:/app/public
-      - ./front/park-ia/next.config.mjs:/app/next.config.mjs
-      - ./front/park-ia/.env:/app/.env
-    command: ["npm", "run", "dev"]
-
-  backend:
-    build:
-      context: ./back
-      dockerfile: Dockerfile
-    volumes:
-      - ./back:/app
+  back:
+    build: ./back
+    container_name: parkia-back
     ports:
       - "8000:8000"
-    working_dir: /app
-    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    volumes:
+      - ./back/static:/app/static
+      - ./back/uploads:/app/uploads
+    environment:
+      - PYTHONUNBUFFERED=1
+      - API_KEY=NyMVhqsspNvipvttBfkQ
+
+  front:
+    build: ./front/park-ia
+    container_name: parkia-front
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - back
