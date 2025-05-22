@@ -2,14 +2,18 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copier les fichiers de dépendances
-COPY park-ia/package*.json ./
+# Optimisation des couches et utilisation du cache
+COPY package*.json ./
 
-RUN npm install
+# Copier uniquement les fichiers nécessaires
+COPY next.config.js ./
+COPY public ./public
+COPY src ./src
 
-# Copier le reste du projet
-COPY park-ia/ .
+# Build en mode production
+RUN npm run build
 
 EXPOSE 3000
 
-CMD ["npm", "run", "dev"]
+# Utiliser la commande start au lieu de dev
+CMD ["npm", "start"]
