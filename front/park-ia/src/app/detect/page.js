@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import BaseButton from '../../../components/basebutton/BaseButton';
 
 export default function DetectPage() {
   const [imageData, setImageData] = useState(null);
@@ -103,14 +104,14 @@ export default function DetectPage() {
               {detections && renderDetections(detections.boxes)}
             </div>
 
-            <div className="flex flex-col items-center justify-center mt-4">
+            <div className="flex flex-col items-center justify-center mt-4 gap-[20px]">
               <p className="text-lg font-semibold text-gray-700">
                 {message}
               </p>
               <Link href="/">
-                <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                <BaseButton >
                   Retour à l'accueil
-                </button>
+                </BaseButton>
               </Link>
             </div>              
           </div>
