@@ -1,13 +1,12 @@
 FROM node:18-alpine
 
-WORKDIR /app
+WORKDIR /park-ia
 
 # Optimisation des couches et utilisation du cache
 COPY package*.json ./
 
 # Copier uniquement les fichiers nécessaires
-COPY next.config.js ./
-COPY public ./public
+COPY next.config.mjs ./
 COPY src ./src
 
 # Build en mode production

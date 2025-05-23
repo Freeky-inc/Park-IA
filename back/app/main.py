@@ -1,20 +1,7 @@
-import base64
-from http.client import HTTPException
-
-import cv2
-import numpy as np
-from fastapi import FastAPI, File, UploadFile
-from fastapi.responses import JSONResponse, FileResponse
-from http.client import HTTPException
-from app.roboflow_detect import detect_parking
+from fastapi import FastAPI
+from app.ia.routes import router as ia_routes
+from app.images.routes import router as images_routes
 from fastapi.middleware.cors import CORSMiddleware
-
-import numpy as np
-
-import shutil
-import os
-import cv2
-import base64
 
 app = FastAPI()
 
@@ -26,54 +13,5 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-UPLOAD_FOLDER = "uploads"
-ANNOTATED_IMAGE = "static/annotated.jpg"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-os.makedirs("static", exist_ok=True)
-
-@app.post("/detect")
-async def detect(file: UploadFile = File(...)):
-    # 1. Sauvegarder l'image uploadée
-    file_location = os.path.join(UPLOAD_FOLDER, file.filename)
-    with open(file_location, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-
-    # 2. Appeler la détection
-    result = detect_parking(file_location, save_path=ANNOTATED_IMAGE)
-
-    # 3. Retourner les résultats JSON + lien vers l'image annotée
-    return JSONResponse(content={
-        "places_detectees": result["count"],
-        "boxes": result["boxes"],
-        "image_url": f"/annotated"
-    })
-
-
-@app.post("/gray_img")
-async def show_uploaded_image(file: UploadFile = File(...)):
-    if not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="Seules les images sont acceptées")
-
-    try:
-        contents = await file.read()
-        img = cv2.imdecode(np.frombuffer(contents, np.uint8), cv2.IMREAD_COLOR)
-        if img is None:
-            raise HTTPException(status_code=400, detail="Image invalide ou illisible")
-
-        # Fix: Correct constant name for grayscale conversion
-        gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        
-        # Save grayscale image
-        gray_path = "static/gray_" + file.filename
-        cv2.imwrite(gray_path, gray_img)
-        
-        # Convert to base64
-        _, buffer = cv2.imencode('.jpg', gray_img)
-        img_base64 = base64.b64encode(buffer).decode("utf-8")
-
-        return {
-            "image_base64": f"data:image/jpeg;base64,{img_base64}",
-        }
-    
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+app.include_router(ia_routes)
+app.include_router(images_routes)
