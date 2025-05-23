@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:latest-alpine
 
 WORKDIR /park-ia
 
