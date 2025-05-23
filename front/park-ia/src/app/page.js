@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { handleImageSubmit, handleImagePreProcessing } from '../functions/images';
 import Loader from '../../components/loader';
+import BaseButton from '../../components/basebutton/BaseButton';
 
 export default function Home() {
   const [imagePreview, setImagePreview] = useState(null);
@@ -81,12 +82,12 @@ const handleSubmit = async () => {
           {imagePreview && (
             <div className='container flex flex-row w-1/2 m-auto justify-center items-center rounded-lg relative'>
               <div className='flex flex-col w-full justify-center items-center gap-4'>
-                <div>
+                <div className="flex flex-col gap-[20px]">
                   <div className="relative group">
                     <img
                       ref={imageRef}
                       src={imagePreview}
-                      className="max-w-full object-contain rounded transition-all duration-300 group-hover:blur-sm"
+                      className="max-w-full object-contain rounded transition-all duration-300 group-hover:blur-[2px]"
                       onLoad={() => {
                         setImageSize({
                           width: imageRef.current.clientWidth,
@@ -108,18 +109,14 @@ const handleSubmit = async () => {
                 </div>
                 {!isLoading && (
                   <div className="flex justify-center gap-4">
-                    <button 
-                      className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" 
-                      onClick={handleSubmit}
-                    > 
+                    <BaseButton onClick={handleSubmit}>
                       Détecter les places
-                    </button>
-                    <button 
-                      className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" 
+                    </BaseButton>
+                    <BaseButton 
                       onClick={handleSubmitProcess}
                     > 
                       Prétraiter et détecter
-                    </button>
+                    </BaseButton>
                   </div>
                 )}
                 {isLoading && (
