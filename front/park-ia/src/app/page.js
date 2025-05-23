@@ -66,17 +66,16 @@ const handleSubmit = async () => {
     <div className='flex flex-col items-center justify-center'>
       <h1 className='uppercase font-bold text-2xl text-red-500 justify-center mt-5 mb-5'>Bienvenue sur Park.IA</h1>
           {!imagePreview && (
-            <div className='container bg-red-100 flex flex-row w-1/2 m-auto justify-center items-center rounded-lg relative'>
-              <div className='flex flex-col w-full justify-center items-center gap-4'>
-                <div className="h-64 flex items-center justify-center">
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    onChange={handleFileChange} 
-                  />
-                </div>
-              </div>
-            </div>
+                    <div className="border-2 border-black rounded-lg px-4 py-4 relative">
+                    <label htmlFor="file-input" className="text-black font-semibold pointer-events-none bg-white/50 px-4 py-2 rounded">Choisir un fichier</label>
+                    <input 
+                      id="file-input"
+                      type="file" 
+                      accept="image/*" 
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                      onChange={handleFileChange}
+                    />
+                  </div>
           )}
           
           {imagePreview && (
@@ -102,7 +101,7 @@ const handleSubmit = async () => {
                         onChange={handleFileChange}
                         className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
                       />
-                    <span className="text-black font-semibold pointer-events-none bg-white/50 px-4 py-2 rounded">
+                    <span className="text-white font-semibold pointer-events-none bg-white/50 px-4 py-2 rounded">
                       Changer l'image
                     </span>
                   </div>
@@ -137,6 +136,7 @@ const handleSubmit = async () => {
             </div>
           </div>
         )}
+
       </div>
     );
   }
