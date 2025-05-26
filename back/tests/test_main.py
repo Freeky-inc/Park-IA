@@ -3,8 +3,9 @@ import sys
 import pytest
 from fastapi.testclient import TestClient
 from PIL import Image
+from fastapi import FastAPI
 
-from app.main import app  # Ensure your FastAPI app is correctly imported
+app = FastAPI()
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
