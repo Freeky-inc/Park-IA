@@ -1,0 +1,25 @@
+# Ignorer node_modules
+node_modules
+
+# Ignorer les fichiers de logs
+*.log
+
+# Ignorer les fichiers de sortie de build
+dist
+build
+
+# Ignorer les fichiers générés par le système d'exploitation
+.DS_Store
+Thumbs.db
+
+# Ignorer les fichiers Docker
+docker-compose*.yml
+
+# Ignorer les fichiers git
+.git
+.gitignore
+
+# Ignorer les dossiers/fichiers des éditeurs/IDE
+.vscode
+.idea
+*.swp
