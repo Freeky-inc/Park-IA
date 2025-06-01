@@ -24,13 +24,13 @@ export default function Home() {
   return (
     <div className='flex w-full'>
       <div className='flex flex-col w-full bg-blue-100'></div>
-      <div className='flex flex-col items-center w-5/10 h-screen bg-red-100 px-5 py-10 place-content-between'>
+      <div className='flex flex-col items-center w-3/10 h-screen bg-white px-5 py-10 place-content-between'>
         <div className='flex flex-col items-center'>
-          <h1 className="text-5xl font-bold text-center mb-4">Bienvenue sur Park.IA</h1>
+          <h1 className="text-5xl font-bold text-center mb-10">Bienvenue sur Park.IA</h1>
           <img src="/parking.svg" alt="Logo" width={100} />
         </div>
         {!isValid && (
-          <div className='text-3xl font-bold'>
+          <div className='text-2xl font-bold'>
             <p>
               Indique ta position pour chercher une place de parking dès à présent 
               (ou sinon ton addresse de destination si tu veux chercher une place en avance)
@@ -38,7 +38,7 @@ export default function Home() {
           </div>
         )} 
         {isValid && (
-          <div className='text-3xl font-bold'>
+          <div className='text-2xl font-bold'>
             <p>
               Et voilà !! La place de parking la plus proche se trouve au {}. 
               N’hésite pas à réessayer notre app si jamais la place est prise 
@@ -47,7 +47,7 @@ export default function Home() {
           </div>
         )}
 
-        <div className='flex flex-col w-full py-10'>
+        <div className='flex flex-col w-full'>
           <input
             type="text"
             className="mt-8 p-3 rounded-lg border border-black w-full text-xl"
