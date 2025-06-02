@@ -2,7 +2,7 @@
 import { useEffect, useState, useRef } from 'react';
 import Maps from '../../components/map';
 import Loader from '../../components/loader';
-import { geocodeAddress } from '../functions/maps';
+import { randomizeImagePositions, geocodeAddress } from '../functions/maps';
 
 export default function Home() {
   const [isValid, setIsValid] = useState(false);
@@ -10,6 +10,7 @@ export default function Home() {
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState(null);
+  const [route, setRoute] = useState(null);
   const suggestionsRef = useRef(null);
   const debounceTimeout = useRef();
 
@@ -67,14 +68,26 @@ export default function Home() {
     const pos = await geocodeAddress(addr);
     if (pos) {
       setSelectedPosition(pos);
+    }
+  };
+
+  const handleRandomize = async () => {
+    try {
+      const response = await randomizeImagePositions(selectedPosition.lat, selectedPosition.lon);
+      // response contient { randomized, closest, route }
       setIsValid(true);
+      setRoute(response.route); // Stocke la géométrie du trajet
+      // Tu peux aussi utiliser response.closest si besoin
+      alert('Positions randomisées !');
+    } catch (e) {
+      alert('Erreur lors de la randomisation');
     }
   };
 
   return (
     <div className='flex w-full'>
       <div className='flex flex-col w-full bg-blue-100'>
-        <Maps position={selectedPosition} />
+        <Maps position={selectedPosition} route={route} />
       </div>
       <div className='flex flex-col items-center w-3/10 h-screen bg-white px-5 py-10 place-content-between'>
         <div className='flex flex-col items-center'>
@@ -132,7 +145,7 @@ export default function Home() {
               ${address.trim() !== "" ? "bg-red-600 hover:bg-red-700 text-white cursor-pointer" : "bg-gray-400 text-white cursor-not-allowed"}`}
             onClick={() => {
               if (address.trim() !== "") {
-                handleSelectAddress(address);
+                handleRandomize(address);
               }
             }}
             disabled={address.trim() === ""}

@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from app.ia.routes import router as ia_routes
 from app.images.routes import router as images_routes
+from app.map.routes import router as map_routes
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -15,3 +16,4 @@ app.add_middleware(
 
 app.include_router(ia_routes)
 app.include_router(images_routes)
+app.include_router(map_routes)

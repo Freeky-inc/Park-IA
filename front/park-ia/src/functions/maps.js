@@ -1,3 +1,6 @@
+import { postData } from '../../lib/api';
+
+
 /**
  * Convertit une adresse en coordonnées latitude/longitude via Nominatim.
  * @param {string} address
@@ -16,4 +19,14 @@ export async function geocodeAddress(address) {
     };
   }
   return null;
+}
+
+export async function randomizeImagePositions(lat, lon) {
+  const res = await fetch('/detect', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ lat, lon }),
+  });
+  if (!res.ok) throw new Error('Erreur lors de la randomisation');
+  return await res.json(); // { randomized, closest, route }
 }

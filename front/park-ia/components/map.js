@@ -21,6 +21,11 @@ const Popup = dynamic(
   { ssr: false }
 );
 
+const Polyline = dynamic(
+  () => import('react-leaflet').then(mod => mod.Polyline),
+  { ssr: false }
+);
+
 // Configuration des icônes Leaflet côté client uniquement
 function useLeafletIcons() {
   useEffect(() => {
@@ -47,7 +52,7 @@ function FlyToPosition({ position }) {
   return null;
 }
 
-export default function Maps({ position }) {
+export default function Maps({ position, route }) { // <-- ajoute route ici
   useLeafletIcons();
 
   return (
@@ -71,6 +76,12 @@ export default function Maps({ position }) {
                 </Marker>
                 <FlyToPosition position={position} />
               </>
+            )}
+            {route && route.length > 0 && (
+              <Polyline
+                positions={route.map(([lon, lat]) => [lat, lon])}
+                pathOptions={{ color: 'red', weight: 5 }}
+              />
             )}
           </MapContainer>
         </div>
