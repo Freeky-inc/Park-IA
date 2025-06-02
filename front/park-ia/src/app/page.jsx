@@ -1,12 +1,13 @@
 "use client"
 import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { handleImageSubmit, handleImagePreProcessing } from '../functions/images';
-import Loader from '../../components/loader';
+import Maps from '../../components/map';
+// import { useRouter } from 'next/navigation';
+// // import { handleImageSubmit, handleImagePreProcessing } from '../functions/images';
+// // import Loader from '../../components/loader';
 
 export default function Home() {
-  const [imagePreview, setImagePreview] = useState(null);
-  const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
+  // const [imagePreview, setImagePreview] = useState(null);
+  // const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
   const imageRef = useRef(null); // Add this line
   const [isValid, setIsValid] = useState(true);
   const [address, setAddress] = useState("");
@@ -23,7 +24,9 @@ export default function Home() {
 
   return (
     <div className='flex w-full'>
-      <div className='flex flex-col w-full bg-blue-100'></div>
+      <div className='flex flex-col w-full bg-blue-100'>
+        <Maps/>
+      </div>
       <div className='flex flex-col items-center w-3/10 h-screen bg-white px-5 py-10 place-content-between'>
         <div className='flex flex-col items-center'>
           <h1 className="text-5xl font-bold text-center mb-10">Bienvenue sur Park.IA</h1>
