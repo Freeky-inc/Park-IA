@@ -1,142 +1,146 @@
-"use client"
-import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { handleImageSubmit, handleImagePreProcessing } from '../functions/images';
+"use client";
+import { useEffect, useState, useRef } from 'react';
+import Maps from '../../components/map';
 import Loader from '../../components/loader';
+import { geocodeAddress } from '../functions/maps';
 
 export default function Home() {
-  const [imagePreview, setImagePreview] = useState(null);
-  const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
-  const imageRef = useRef(null); // Add this line
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file && file.type.startsWith("image/")) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      setImagePreview(null);
-    }
-  };
-
-const handleSubmit = async () => {
-    if (!imagePreview) return;
-
-    setIsLoading(true);
-    try {
-      const result = await handleImageSubmit(imagePreview);
-      localStorage.setItem('parkIA_image', imagePreview);
-      localStorage.setItem('parkIA_detections', JSON.stringify(result));
-      await router.push('/detect');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSubmitProcess = async () => {
-    if (!imagePreview) return;
-
-    setIsLoading(true);
-    try {
-      const result = await handleImagePreProcessing(imagePreview);
-      localStorage.setItem('parkIA_image', imagePreview);
-      localStorage.setItem('parkIA_detections', JSON.stringify(result));
-      
-      await router.push('/detect');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [isValid, setIsValid] = useState(false);
+  const [address, setAddress] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedPosition, setSelectedPosition] = useState(null);
+  const suggestionsRef = useRef(null);
+  const debounceTimeout = useRef();
 
   useEffect(() => {
-    if (imageRef.current) {
-      setImageSize({
-        width: imageRef.current.clientWidth,
-        height: imageRef.current.clientHeight
-      });
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
     }
-  }, [imagePreview]);
+
+    const query = address.trim();
+    if (query.length < 3) {
+      setSuggestions([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    debounceTimeout.current = setTimeout(() => {
+      const controller = new AbortController();
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`, {
+        signal: controller.signal,
+        headers: { 'Accept-Language': 'fr' }
+      })
+        .then(res => res.json())
+        .then(data => {
+          setSuggestions(data);
+          setLoading(false);
+        })
+        .catch(() => {
+          setLoading(false);
+        });
+
+      return () => controller.abort();
+    }, 1000);
+
+    return () => {
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
+      }
+    };
+  }, [address]);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target)) {
+        setSuggestions([]);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSelectAddress = async (addr) => {
+    setAddress(addr);
+    setSuggestions([]);
+    const pos = await geocodeAddress(addr);
+    if (pos) {
+      setSelectedPosition(pos);
+      setIsValid(true);
+    }
+  };
 
   return (
-    <div className='flex flex-col items-center justify-center'>
-      <h1 className='uppercase font-bold text-2xl text-red-500 justify-center mt-5 mb-5'>Bienvenue sur Park.IA</h1>
-          {!imagePreview && (
-            <div className='container bg-red-100 flex flex-row w-1/2 m-auto justify-center items-center rounded-lg relative'>
-              <div className='flex flex-col w-full justify-center items-center gap-4'>
-                <div className="h-64 flex items-center justify-center">
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    onChange={handleFileChange} 
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-          
-          {imagePreview && (
-            <div className='container flex flex-row w-1/2 m-auto justify-center items-center rounded-lg relative'>
-              <div className='flex flex-col w-full justify-center items-center gap-4'>
-                <div>
-                  <div className="relative group">
-                    <img
-                      ref={imageRef}
-                      src={imagePreview}
-                      className="max-w-full object-contain rounded transition-all duration-300 group-hover:blur-sm"
-                      onLoad={() => {
-                        setImageSize({
-                          width: imageRef.current.clientWidth,
-                          height: imageRef.current.clientHeight
-                        });
-                      }}
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        onChange={handleFileChange}
-                        className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
-                      />
-                    <span className="text-black font-semibold pointer-events-none bg-white/50 px-4 py-2 rounded">
-                      Changer l'image
-                    </span>
-                  </div>
-                </div>
-                {!isLoading && (
-                  <div className="flex justify-center gap-4">
-                    <button 
-                      className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" 
-                      onClick={handleSubmit}
-                    > 
-                      Détecter les places
-                    </button>
-                    <button 
-                      className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" 
-                      onClick={handleSubmitProcess}
-                    > 
-                      Prétraiter et détecter
-                    </button>
-                  </div>
-                )}
-                {isLoading && (
-                  <div className='h-svh w-screen backdrop-blur-md fixed top-0 left-0 flex-col items-center justify-center place-content-center'>
-                    <div className='flex items-center justify-center'>
-                      <Loader/>
-                    </div>
-                    <div className=" flex items-center justify-center">
-                      <p>Chargement des données...</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+    <div className='flex w-full'>
+      <div className='flex flex-col w-full bg-blue-100'>
+        <Maps position={selectedPosition} />
+      </div>
+      <div className='flex flex-col items-center w-3/10 h-screen bg-white px-5 py-10 place-content-between'>
+        <div className='flex flex-col items-center'>
+          <h1 className="text-5xl font-bold text-center mb-10">Bienvenue sur Park.IA</h1>
+          <img src="/parking.svg" alt="Logo" width={100} />
+        </div>
+        {!isValid && (
+          <div className='text-2xl font-bold'>
+            <p>
+              Indique ta position pour chercher une place de parking dès à présent 
+              (ou sinon ton addresse de destination si tu veux chercher une place en avance)
+            </p>
+          </div>
+        )} 
+        {isValid && selectedPosition && (
+          <div className='text-2xl font-bold'>
+            <p>
+              Et voilà !! La place de parking la plus proche se trouve à la latitude {selectedPosition.lat}, longitude {selectedPosition.lon}. 
+              N’hésite pas à réessayer notre app si jamais la place est prise 
+              (ou sinon tu lui vole sa voiture 🏴‍☠️)
+            </p>
           </div>
         )}
+
+        <div className='flex flex-col w-full relative' ref={suggestionsRef}>
+          {/* Suggestions juste au-dessus de l'input */}
+          {suggestions.length > 0 && !loading && (
+            <ul className="absolute z-10 bg-white border border-gray-300 w-full max-h-60 rounded overflow-y-auto bottom-full mb-2">
+              {suggestions.map((s) => (
+                <li
+                  key={s.place_id}
+                  className="p-2 hover:bg-blue-100 cursor-pointer"
+                  onClick={() => handleSelectAddress(s.display_name)}
+                >
+                  {s.display_name}
+                </li>
+              ))}
+            </ul>
+          )}
+          <input
+            type="text"
+            className="mt-8 p-3 rounded-lg border border-black w-full text-xl"
+            placeholder="Entrez une adresse ou un lieu"
+            autoComplete="off"
+            value={address}
+            onChange={e => setAddress(e.target.value)}
+          />
+          {loading && (
+            <div className="absolute left-1/2 -translate-x-1/2 top-2 z-20">
+              <Loader/>
+            </div>
+          )}
+          <button
+            className={`mt-4 w-full h-13 rounded-lg text-3xl font-bold transition 
+              ${address.trim() !== "" ? "bg-red-600 hover:bg-red-700 text-white cursor-pointer" : "bg-gray-400 text-white cursor-not-allowed"}`}
+            onClick={() => {
+              if (address.trim() !== "") {
+                handleSelectAddress(address);
+              }
+            }}
+            disabled={address.trim() === ""}
+          >
+            C'est Parti !!
+          </button>
+        </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
