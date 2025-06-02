@@ -2,12 +2,14 @@
 import { useEffect, useState, useRef } from 'react';
 import Maps from '../../components/map';
 import Loader from '../../components/loader';
+import { geocodeAddress } from '../functions/maps';
 
 export default function Home() {
   const [isValid, setIsValid] = useState(false);
   const [address, setAddress] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [selectedPosition, setSelectedPosition] = useState(null);
   const suggestionsRef = useRef(null);
   const debounceTimeout = useRef();
 
@@ -59,10 +61,20 @@ export default function Home() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const handleSelectAddress = async (addr) => {
+    setAddress(addr);
+    setSuggestions([]);
+    const pos = await geocodeAddress(addr);
+    if (pos) {
+      setSelectedPosition(pos);
+      setIsValid(true);
+    }
+  };
+
   return (
     <div className='flex w-full'>
       <div className='flex flex-col w-full bg-blue-100'>
-        <Maps />
+        <Maps position={selectedPosition} />
       </div>
       <div className='flex flex-col items-center w-3/10 h-screen bg-white px-5 py-10 place-content-between'>
         <div className='flex flex-col items-center'>
@@ -77,10 +89,10 @@ export default function Home() {
             </p>
           </div>
         )} 
-        {isValid && (
+        {isValid && selectedPosition && (
           <div className='text-2xl font-bold'>
             <p>
-              Et voilà !! La place de parking la plus proche se trouve au {}. 
+              Et voilà !! La place de parking la plus proche se trouve à la latitude {selectedPosition.lat}, longitude {selectedPosition.lon}. 
               N’hésite pas à réessayer notre app si jamais la place est prise 
               (ou sinon tu lui vole sa voiture 🏴‍☠️)
             </p>
@@ -88,47 +100,43 @@ export default function Home() {
         )}
 
         <div className='flex flex-col w-full relative' ref={suggestionsRef}>
+          {/* Suggestions juste au-dessus de l'input */}
           {suggestions.length > 0 && !loading && (
-            <ul className="absolute z-10 bg-white border border-gray-300 w-full max-h-18 rounded overflow-y-auto bottom-32">
+            <ul className="absolute z-10 bg-white border border-gray-300 w-full max-h-60 rounded overflow-y-auto bottom-full mb-2">
               {suggestions.map((s) => (
                 <li
                   key={s.place_id}
                   className="p-2 hover:bg-blue-100 cursor-pointer"
-                  onClick={() => {
-                    setAddress(s.display_name);
-                    setSuggestions([]);
-                    }}
-                  >
-                    {s.display_name}
-                  </li>
-                  ))}
-                </ul>
-                )}
-                <input
-                  type="text"
-                  className="mt-8 p-3 rounded-lg border border-black w-full text-xl"
-                  placeholder="Entrez une adresse ou un lieu"
-                  autoComplete="off"
-                  value={address}
-                  onChange={e => setAddress(e.target.value)}
-                />
-                {loading && (
-                <div className="absolute left-1/2 -translate-x-1/2 -top-15">
-                  <Loader/>
-                </div>
-                )}
-                <button
-                  className={`mt-4 w-full h-13 rounded-lg text-3xl font-bold transition 
-                  ${address.trim() !== "" ? "bg-red-600 hover:bg-red-700 text-white cursor-pointer" : "bg-gray-400 text-white cursor-not-allowed"}`}
-                  onClick={() => {
-                    if (address.trim() !== "") {
-                      setIsValid(false);
-                      setAddress("");
-                      setSuggestions([]);
-                    }
-                  }}
-                disabled={address.trim() === ""}
-              >
+                  onClick={() => handleSelectAddress(s.display_name)}
+                >
+                  {s.display_name}
+                </li>
+              ))}
+            </ul>
+          )}
+          <input
+            type="text"
+            className="mt-8 p-3 rounded-lg border border-black w-full text-xl"
+            placeholder="Entrez une adresse ou un lieu"
+            autoComplete="off"
+            value={address}
+            onChange={e => setAddress(e.target.value)}
+          />
+          {loading && (
+            <div className="absolute left-1/2 -translate-x-1/2 top-2 z-20">
+              <Loader/>
+            </div>
+          )}
+          <button
+            className={`mt-4 w-full h-13 rounded-lg text-3xl font-bold transition 
+              ${address.trim() !== "" ? "bg-red-600 hover:bg-red-700 text-white cursor-pointer" : "bg-gray-400 text-white cursor-not-allowed"}`}
+            onClick={() => {
+              if (address.trim() !== "") {
+                handleSelectAddress(address);
+              }
+            }}
+            disabled={address.trim() === ""}
+          >
             C'est Parti !!
           </button>
         </div>
