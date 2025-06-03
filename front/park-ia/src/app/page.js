@@ -2,7 +2,7 @@
 import { useEffect, useState, useRef } from 'react';
 import Maps from '../../components/map';
 import Loader from '../../components/loader';
-import { randomizeImagePositions, geocodeAddress } from '../functions/maps';
+import { randomizeImagePositions} from '../functions/maps';
 
 export default function Home() {
   const [isValid, setIsValid] = useState(false);
@@ -29,18 +29,15 @@ export default function Home() {
     setLoading(true);
     debounceTimeout.current = setTimeout(() => {
       const controller = new AbortController();
-      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`, {
-        signal: controller.signal,
-        headers: { 'Accept-Language': 'fr' }
+      fetch(`http://localhost:8000/geocode?q=${encodeURIComponent(query)}`)
+      .then(res => res.json())
+      .then(data => {
+        setSuggestions(data);
+        setLoading(false);
       })
-        .then(res => res.json())
-        .then(data => {
-          setSuggestions(data);
-          setLoading(false);
-        })
-        .catch(() => {
-          setLoading(false);
-        });
+      .catch(() => {
+        setLoading(false);
+      });
 
       return () => controller.abort();
     }, 1000);
@@ -62,25 +59,25 @@ export default function Home() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleSelectAddress = async (addr) => {
-    setAddress(addr);
+  const handleSelectAddress = async (suggestion) => {
+    setAddress(suggestion.display_name);
     setSuggestions([]);
-    const pos = await geocodeAddress(addr);
-    if (pos) {
-      setSelectedPosition(pos);
-    }
+    setSelectedPosition({
+      lat: parseFloat(suggestion.lat),
+      lon: parseFloat(suggestion.lon)
+    });
   };
 
   const handleRandomize = async () => {
     try {
+      console.log('selectedPosition:', selectedPosition);
       const response = await randomizeImagePositions(selectedPosition.lat, selectedPosition.lon);
-      // response contient { randomized, closest, route }
       setIsValid(true);
-      setRoute(response.route); // Stocke la géométrie du trajet
-      // Tu peux aussi utiliser response.closest si besoin
+      setRoute(response.route);
       alert('Positions randomisées !');
     } catch (e) {
       alert('Erreur lors de la randomisation');
+      console.log(selectedPosition?.lat, selectedPosition?.lon);
     }
   };
 
@@ -120,7 +117,7 @@ export default function Home() {
                 <li
                   key={s.place_id}
                   className="p-2 hover:bg-blue-100 cursor-pointer"
-                  onClick={() => handleSelectAddress(s.display_name)}
+                  onClick={() => handleSelectAddress(s)}
                 >
                   {s.display_name}
                 </li>
@@ -142,13 +139,13 @@ export default function Home() {
           )}
           <button
             className={`mt-4 w-full h-13 rounded-lg text-3xl font-bold transition 
-              ${address.trim() !== "" ? "bg-red-600 hover:bg-red-700 text-white cursor-pointer" : "bg-gray-400 text-white cursor-not-allowed"}`}
+              ${selectedPosition ? "bg-red-600 hover:bg-red-700 text-white cursor-pointer" : "bg-gray-400 text-white cursor-not-allowed"}`}
             onClick={() => {
-              if (address.trim() !== "") {
-                handleRandomize(address);
+              if (selectedPosition) {
+                handleRandomize();
               }
             }}
-            disabled={address.trim() === ""}
+            disabled={!selectedPosition}
           >
             C'est Parti !!
           </button>

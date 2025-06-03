@@ -20,7 +20,6 @@ const Popup = dynamic(
   () => import('react-leaflet').then(mod => mod.Popup),
   { ssr: false }
 );
-
 const Polyline = dynamic(
   () => import('react-leaflet').then(mod => mod.Polyline),
   { ssr: false }
@@ -29,7 +28,6 @@ const Polyline = dynamic(
 // Configuration des icônes Leaflet côté client uniquement
 function useLeafletIcons() {
   useEffect(() => {
-    // Dynamically import leaflet only on client
     import('leaflet').then(L => {
       delete L.Icon.Default.prototype._getIconUrl;
       L.Icon.Default.mergeOptions({
@@ -52,16 +50,28 @@ function FlyToPosition({ position }) {
   return null;
 }
 
-export default function Maps({ position, route }) { // <-- ajoute route ici
+export default function Maps({ position, route }) {
   useLeafletIcons();
+
+  // Log pour debug
+  if (route && route.geometry) {
+    console.log("Route geometry:", route.geometry);
+  }
+
+  // Centre la carte sur le début du trajet si dispo, sinon sur la position
+  const start = route && route.geometry && route.geometry.length > 0
+    ? [route.geometry[0][1], route.geometry[0][0]]
+    : position
+      ? [position.lat, position.lon]
+      : [48.8566, 2.3522];
 
   return (
     <div className='flex w-full'>
       <div className='flex flex-col w-full bg-blue-100'>
         <div style={{ height: "100vh", width: "100%" }}>
           <MapContainer
-            center={position ? [position.lat, position.lon] : [48.8566, 2.3522]}
-            zoom={13}
+            center={start}
+            zoom={18}
             style={{ height: "100%", width: "100%" }}
             scrollWheelZoom={true}
           >
@@ -77,9 +87,9 @@ export default function Maps({ position, route }) { // <-- ajoute route ici
                 <FlyToPosition position={position} />
               </>
             )}
-            {route && route.length > 0 && (
+            {route && route.geometry && Array.isArray(route.geometry) && route.geometry.length > 0 && (
               <Polyline
-                positions={route.map(([lon, lat]) => [lat, lon])}
+                positions={route.geometry.map(([lon, lat]) => [lat, lon])}
                 pathOptions={{ color: 'red', weight: 5 }}
               />
             )}
