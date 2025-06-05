@@ -5,3 +5,4 @@ roboflow
 opencv-python
 pytest
 httpx
+polyline
