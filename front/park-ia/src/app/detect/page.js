@@ -81,39 +81,41 @@ export default function DetectPage() {
 
 
   return (
-    <div className='flex flex-col items-center justify-center'>
-      <h1 className='uppercase font-bold text-2xl text-red-500 justify-center mt-5 mb-5'>
-        Résultats de la détection
-      </h1>
-      
-      <div className='container flex flex-row w-1/2 m-auto justify-center items-center rounded-lg relative'>
-        <div className='flex flex-col w-full justify-center items-center gap-4'>
-          <div>
-            <div className="relative">
-              <img
-                ref={imageRef}
-                src={imageData}
-                className="max-w-full object-contain rounded"
-                onLoad={() => {
-                  setImageSize({
-                    width: imageRef.current.clientWidth,
-                    height: imageRef.current.clientHeight
-                  });
-                }}
-              />
-              {detections && renderDetections(detections.boxes)}
+    <div className='min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50'>
+      <div className='w-full max-w-4xl p-8 backdrop-blur-lg bg-white/30 rounded-2xl shadow-xl border border-white/40'>
+        <h1 className='uppercase font-bold text-4xl text-center mb-8 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent'>
+          Résultats de la détection
+        </h1>
+        
+        <div className='w-full'>
+          <div className='flex flex-col items-center gap-6'>
+            <div className="relative group w-full max-w-2xl">
+              <div className="rounded-xl overflow-hidden shadow-2xl">
+                <img
+                  ref={imageRef}
+                  src={imageData}
+                  className="w-full h-auto object-contain"
+                  onLoad={() => {
+                    setImageSize({
+                      width: imageRef.current.clientWidth,
+                      height: imageRef.current.clientHeight
+                    });
+                  }}
+                />
+                {detections && renderDetections(detections.boxes)}
+              </div>
             </div>
 
-            <div className="flex flex-col items-center justify-center mt-4 gap-[20px]">
-              <p className="text-lg font-semibold text-gray-700">
+            <div className="flex flex-col items-center justify-center gap-6">
+              <p className="text-xl font-semibold text-gray-700 bg-white/30 backdrop-blur-sm px-6 py-3 rounded-lg border border-white/30">
                 {message}
               </p>
               <Link href="/">
-                <BaseButton >
+                <BaseButton className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
                   Retour à l'accueil
                 </BaseButton>
               </Link>
-            </div>              
+            </div>
           </div>
         </div>
       </div>
