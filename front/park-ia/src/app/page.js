@@ -68,6 +68,9 @@ const handleSubmit = async () => {
       <div className='w-full max-w-4xl p-8 backdrop-blur-lg bg-white/30 rounded-2xl shadow-xl border border-white/40'>
         <h1 className='uppercase font-bold text-4xl text-center mb-8 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent'>
           Bienvenue sur Park.IA
+        <p className="text-center text-gray-400 mt-2 text-[12px]">
+          Détectez automatiquement les places de parking disponibles dans vos images
+        </p>
         </h1>
 
         {!imagePreview && (
