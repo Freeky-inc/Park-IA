@@ -46,26 +46,32 @@ def haversine(lat1, lon1, lat2, lon2):
 
 def randomize_images_and_find_closest(center_lat, center_lon, min_radius=500, max_radius=2000):
     """
-    Prend les 5 images du dossier uploads, randomise leur position autour du centre
-    (à une distance comprise entre min_radius et max_radius),
-    et retourne la liste randomisée + la lat/lon du point le plus proche du centre + l'image correspondante.
+    Associe les 5 dernières images aux 5 coordonnées fixes fournies.
+    Retourne la liste et le point le plus proche du centre.
     """
     image_files = get_latest_images(5)
     images = [{'filename': fname} for fname in image_files]
 
+    # Liste de tes 5 coordonnées fixes (lat, lon)
+    coords = [
+        (46.28716019815672, 6.084893168592775),
+        (46.28757310184566, 6.087230269869162),
+        (46.28971213864676, 6.087976796211865),
+        (46.286159954091296, 6.085662178826428),
+        (46.288761093529395, 6.081591240189916)
+    ]
+
+    # Associe chaque image à une coordonnée
     randomized = []
-    for img in images:
-        new_lat, new_lon = random_point(center_lat, center_lon, min_radius, max_radius)
-        randomized.append({**img, 'lat': new_lat, 'lon': new_lon})
+    for img, (lat, lon) in zip(images, coords):
+        randomized.append({**img, 'lat': lat, 'lon': lon})
 
     closest = min(
         randomized,
         key=lambda img: haversine(center_lat, center_lon, img['lat'], img['lon'])
     )
 
-    # Retourne la liste randomisée, la lat/lon du point le plus proche et l'image correspondante
     return randomized, {'lat': closest['lat'], 'lon': closest['lon'], 'filename': closest['filename']}
-
 def get_route(start_lat, start_lon, end_lat, end_lon):
     """
     Retourne le trajet entre deux points via OpenRouteService :
