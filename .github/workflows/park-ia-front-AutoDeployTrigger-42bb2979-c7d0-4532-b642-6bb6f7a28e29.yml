@@ -1,0 +1,48 @@
+name: Trigger auto deployment for park-ia-front
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ V-2.0 ]
+    paths:
+    - '**'
+    - '.github/workflows/park-ia-front-AutoDeployTrigger-42bb2979-c7d0-4532-b642-6bb6f7a28e29.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:      
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions: 
+      id-token: write #This is required for requesting the OIDC JWT Token
+      contents: read #Required when GH token is used to authenticate with private repo
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.PARKIAFRONT_AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.PARKIAFRONT_AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.PARKIAFRONT_AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: ${{ github.workspace }}
+          _dockerfilePathKey_: _dockerfilePath_
+          registryUrl: parkiacr.azurecr.io
+          registryUsername: ${{ secrets.PARKIAFRONT_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.PARKIAFRONT_REGISTRY_PASSWORD }}
+          containerAppName: park-ia-front
+          resourceGroup: ParkiaRG
+          imageToBuild: parkiacr.azurecr.io/park-ia-front:${{ github.sha }}
+          _buildArgumentsKey_: |
+            _buildArgumentsValues_
+
+
