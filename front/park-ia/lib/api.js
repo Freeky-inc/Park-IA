@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create axios instance with default config
 const apiClient = axios.create({
-  baseURL: 'http://localhost:8000',
+  baseURL: process.env.NEXT_PUBLIC_APP_BASE_URL || 'http://localhost:8000', // Use environment variable or fallback to localhost
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
