@@ -112,8 +112,17 @@ export default function Home() {
         )}
 
         <div className='flex flex-col w-full px-4 lg:px-6 relative' ref={suggestionsRef}>
+          
+          <input
+            type="text"
+            className="mt-4 lg:mt-8 p-3 rounded-xl border border-white/50 w-full text-base lg:text-lg backdrop-blur-xl bg-white/30 shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-600/50 transition-all text-gray-800 placeholder-gray-600"
+            placeholder="Entrez une adresse ou un lieu"
+            autoComplete="off"
+            value={address}
+            onChange={e => setAddress(e.target.value)}
+          />
           {suggestions.length > 0 && !loading && (
-            <ul className="absolute z-10 backdrop-blur-xl bg-white/40 border border-white/50 w-full max-h-60 rounded-xl overflow-y-auto bottom-full mb-2 shadow-lg">
+            <ul className=" z-10 backdrop-blur-xl bg-white/40 border border-white/50 w-full max-h-60 rounded-xl overflow-y-auto bottom-full mb-2 shadow-lg">
               {suggestions.map((s) => (
                 <li
                   key={s.place_id}
@@ -125,14 +134,6 @@ export default function Home() {
               ))}
             </ul>
           )}
-          <input
-            type="text"
-            className="mt-4 lg:mt-8 p-3 rounded-xl border border-white/50 w-full text-base lg:text-lg backdrop-blur-xl bg-white/30 shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-600/50 transition-all text-gray-800 placeholder-gray-600"
-            placeholder="Entrez une adresse ou un lieu"
-            autoComplete="off"
-            value={address}
-            onChange={e => setAddress(e.target.value)}
-          />
           {loading && (
             <div className="absolute left-1/2 -translate-x-1/2 top-2 z-20">
               <Loader/>
