@@ -69,13 +69,15 @@ export default function Home() {
   };
 
   const handleRandomize = async () => {
+    setLoading(true);
     try {
       console.log('selectedPosition:', selectedPosition);
       const response = await randomizeImagePositions(selectedPosition.lat, selectedPosition.lon);
       setIsValid(true);
       setRoute(response.route);
-      alert('Positions randomisées !');
+      setLoading(false);
     } catch (e) {
+      setLoading(false);
       alert('Erreur lors de la randomisation');
       console.log(selectedPosition?.lat, selectedPosition?.lon);
     }
@@ -90,7 +92,7 @@ export default function Home() {
       </div>
       <div className='flex flex-col items-center w-full lg:w-[450px] h-auto lg:h-[90vh] rounded-2xl backdrop-blur-xl bg-white/30 border border-white/50 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] p-4 lg:p-0'>
         <div className='flex flex-col items-center mt-4 lg:mt-8'>
-          <h1 className="text-3xl lg:text-4xl font-bold text-center mb-4 lg:mb-6 bg-gradient-to-r from-blue-800 to-purple-800 bg-clip-text text-transparent">Park.IA</h1>
+          <h1 className="text-3xl lg:text-4xl font-bold text-center mb-4 lg:mb-6 bg-gradient-to-r from-blue-800 to-purple-800 bg-clip-text text-transparent">Park.AI</h1>
           <img src="/parking.svg" alt="Logo" width={60} className="drop-shadow-lg lg:w-[80px]" />
         </div>
         {!isValid && (
