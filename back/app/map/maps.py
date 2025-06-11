@@ -1,4 +1,3 @@
-import random
 import math
 import os
 import dotenv
@@ -24,18 +23,6 @@ def get_latest_images(n=5):
     )
     return files[:n]
 
-def random_point(lat, lon, min_radius, max_radius):
-    """
-    Génère un point aléatoire à une distance comprise entre min_radius et max_radius (en mètres) du centre.
-    """
-    angle = random.uniform(0, 2 * math.pi)
-    distance = random.uniform(min_radius, max_radius)
-    dx = distance * math.cos(angle)
-    dy = distance * math.sin(angle)
-    delta_lat = dy / 111320
-    delta_lon = dx / (40075000 * math.cos(math.radians(lat)) / 360)
-    return lat + delta_lat, lon + delta_lon
-
 def haversine(lat1, lon1, lat2, lon2):
     R = 6371000
     phi1, phi2 = math.radians(lat1), math.radians(lat2)
@@ -44,7 +31,7 @@ def haversine(lat1, lon1, lat2, lon2):
     a = math.sin(dphi/2)**2 + math.cos(phi1)*math.cos(phi2)*math.sin(dlambda/2)**2
     return 2 * R * math.asin(math.sqrt(a))
 
-def randomize_images_and_find_closest(center_lat, center_lon, min_radius=500, max_radius=2000):
+def randomize_images_and_find_closest(center_lat, center_lon):
     """
     Associe les 5 dernières images aux 5 coordonnées fixes fournies.
     Retourne la liste et le point le plus proche du centre.
@@ -72,6 +59,7 @@ def randomize_images_and_find_closest(center_lat, center_lon, min_radius=500, ma
     )
 
     return randomized, {'lat': closest['lat'], 'lon': closest['lon'], 'filename': closest['filename']}
+
 def get_route(start_lat, start_lon, end_lat, end_lon):
     """
     Retourne le trajet entre deux points via OpenRouteService :
@@ -94,6 +82,13 @@ def get_route(start_lat, start_lon, end_lat, end_lon):
         resp = requests.post(url, json=body, headers=headers, timeout=10)
         resp.raise_for_status()
         data = resp.json()
+        if not data.get("routes"):
+            return {
+                "geometry": [],
+                "distance": None,
+                "duration": None,
+                "error": "No route found"
+            }
         route = data["routes"][0]
         geometry = polyline.decode(route["geometry"])  # [(lat, lon), ...]
         geometry = [[lon, lat] for lat, lon in geometry]  # Pour Leaflet
@@ -104,6 +99,11 @@ def get_route(start_lat, start_lon, end_lat, end_lon):
             "duration": summary["duration"]
         }
     except Exception as e:
+        print("ORS error:", e)
+        try:
+            print("ORS response:", resp.text)
+        except:
+            pass
         return {
             "geometry": [],
             "distance": None,
