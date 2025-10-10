@@ -28,8 +28,6 @@ To launch the backend server, run one of the following commands in your terminal
 
 ```bash
 uvicorn app.main:app --reload
-If the above command doesn’t work, try:
-
 ```
 
 If the first command doesn't work, try this:
